@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module.js';
 import { MongooseModule } from "@nestjs/mongoose"
 import joi from "joi"
 import { JwtModule } from '@nestjs/jwt';
+import { PostModule } from './post/post.module.js';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { JwtModule } from '@nestjs/jwt';
         uri: config.getOrThrow<string>('DATABASE_URL'),
       }),
     }),
-    UserModule
+    UserModule,
+    PostModule
   ],
   controllers: [AppController],
   providers: [AppService],
