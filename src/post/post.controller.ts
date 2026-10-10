@@ -23,7 +23,7 @@ export class PostController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+    return this.postService.findOne(id);
   }
 
   @Patch(':id')
@@ -33,7 +33,7 @@ export class PostController {
     @Body() updatePostDto: UpdatePostDto,
     @CurrentUser() user: UserDocument
   ) {
-    return this.postService.update(+id, updatePostDto, String(user._id));
+    return this.postService.update(id, updatePostDto, String(user._id));
   }
 
   @Delete(':id')
@@ -42,6 +42,6 @@ export class PostController {
     @Param('id') id: string,
     @CurrentUser() user: UserDocument
   ) {
-    return this.postService.remove(+id, String(user._id), user.role === "admin");
+    return this.postService.remove(id, String(user._id), user.role === "admin");
   }
 }

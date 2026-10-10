@@ -35,8 +35,8 @@ export class PostService {
     }
   }
 
-  async findOne(id: number): Promise<IResponse> {
-    const post = this.postModel.findOne({
+  async findOne(id: string): Promise<IResponse> {
+    const post = await this.postModel.findOne({
       _id: id
     }).populate('author', 'firstName lastName email')
 
@@ -51,7 +51,7 @@ export class PostService {
     }
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto, userId: string): Promise<IResponse> {
+  async update(id: string, updatePostDto: UpdatePostDto, userId: string): Promise<IResponse> {
     const { data: post } = await this.findOne(id)
 
 
@@ -70,10 +70,10 @@ export class PostService {
     }
   }
 
-  async remove(id: number, userId: string, isAdmin: boolean): Promise<IResponse> {
+  async remove(id: string, userId: string, isAdmin: boolean): Promise<IResponse> {
     const { data: post } = await this.findOne(id)
 
-    if (post.author !== userId && !isAdmin) {
+    if (post.author?.toString() !== userId && !isAdmin) {
       throw new ForbiddenException("Only author or admin can delete this post")
     }
 
