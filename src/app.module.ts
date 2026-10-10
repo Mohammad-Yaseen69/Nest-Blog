@@ -7,6 +7,7 @@ import { MongooseModule } from "@nestjs/mongoose"
 import joi from "joi"
 import { JwtModule } from '@nestjs/jwt';
 import { PostModule } from './post/post.module.js';
+import { CommentModule } from './comment/comment.module.js';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { PostModule } from './post/post.module.js';
       }),
     }),
     UserModule,
-    PostModule
+    PostModule,
+    CommentModule
   ],
   controllers: [AppController],
   providers: [AppService],
