@@ -38,7 +38,7 @@ export class PostService {
   async findOne(id: string): Promise<IResponse> {
     const post = await this.postModel.findOne({
       _id: id
-    }).populate('author', 'firstName lastName email')
+    }).populate('author', 'firstName lastName email _id')
 
     if (!post) {
       throw new NotFoundException("Post not found")
@@ -51,15 +51,16 @@ export class PostService {
     }
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto, userId: string): Promise<IResponse> {
+  async update(id: string, updatePostData: UpdatePostDto, userId: string): Promise<IResponse> {
     const { data: post } = await this.findOne(id)
 
 
-    if (post.author !== userId) {
-      throw new ForbiddenException("Only author can delete this post")
+    console.log(post.author, userId)
+    if (post.author?._id?.toString() !== userId) {
+      throw new ForbiddenException("Only author can update this post")
     }
 
-    const updatedPost = await this.postModel.findByIdAndUpdate(post._id, { $set: UpdatePostDto }, {
+    const updatedPost = await this.postModel.findByIdAndUpdate(post._id, { $set: updatePostData }, {
       new: true
     })
 
@@ -73,7 +74,7 @@ export class PostService {
   async remove(id: string, userId: string, isAdmin: boolean): Promise<IResponse> {
     const { data: post } = await this.findOne(id)
 
-    if (post.author?.toString() !== userId && !isAdmin) {
+    if (post.author?._id?.toString() !== userId && !isAdmin) {
       throw new ForbiddenException("Only author or admin can delete this post")
     }
 
