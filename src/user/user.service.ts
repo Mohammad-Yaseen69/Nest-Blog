@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './models/user.model.js';
+import { User, UserDocument, UserRole } from './models/user.model.js';
 import { Model } from 'mongoose';
 import { RegisterUserDto } from './dto/register-user.dto.js';
 import { IResponse } from '../common/interface/IResponse.js';
@@ -70,6 +70,31 @@ export class UserService {
         }
     }
 
+    async registerAdmin(adminData: RegisterUserDto): Promise<IResponse> {
+        const existCheck = await this.userModel.findOne({ email: adminData.email });
+
+        if (existCheck) {
+            throw new ConflictException("This email already exists");
+        }
+
+        const hashedPassword = await this.hashPassword(adminData.password);
+
+        const newUser = new this.userModel({
+            ...adminData,
+            password: hashedPassword,
+            role: UserRole.ADMIN
+        });
+
+        await newUser.save();
+
+        const { password, ...userWithoutPassword } = newUser.toObject();
+
+        return {
+            message: "Admin registered successfully",
+            statusCode: 201,
+            data: userWithoutPassword
+        }
+    }
     async getUserById(userId: string): Promise<IResponse> {
         const user = await this.userModel.findById(userId);
 

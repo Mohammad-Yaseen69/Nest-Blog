@@ -5,6 +5,9 @@ import { IResponse } from '../common/interface/IResponse.js';
 import { LoginUserDto } from './dto/login-user.dto.js';
 import { CurrentUser } from './decorator/current-user.decorator.js';
 import { LocalAuthGuard } from './guards/local-auth.guard.js';
+import { RolesGuard } from './guards/roles.guard.js';
+import { Roles } from './decorator/roles.decorator.js';
+import { UserRole } from './models/user.model.js';
 
 @Controller('user')
 export class UserController {
@@ -18,6 +21,13 @@ export class UserController {
   @Post('login')
   async loginUser(@Body() loginData: LoginUserDto): Promise<IResponse> {
     return await this.userService.loginUser(loginData);
+  }
+
+  @Post('register-admin')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(LocalAuthGuard, RolesGuard)
+  async registerAdmin(@Body() userData: RegisterUserDto): Promise<IResponse> {
+    return await this.userService.registerAdmin(userData);
   }
 
   @Get('profile')
