@@ -5,6 +5,7 @@ import { IResponse } from '../common/interface/IResponse.js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from './model/post.model.js';
+import { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
 
 @Injectable()
 export class PostService {
@@ -25,13 +26,42 @@ export class PostService {
     }
   }
 
-  async findAll(): Promise<IResponse> {
-    const allPost = await this.postModel.find().populate('author', 'firstName lastName email')
+  async findAll(query: IPaginationQuery): Promise<IResponse> {
+    const page = Math.max(1, Math.trunc(Number(query.page)) || 1);
+    const limit = Math.min(100, Math.max(1, Math.trunc(Number(query.limit)) || 10));
+
+    const searchQuery = query.query
+
+    const filter = searchQuery
+      ? {
+        $or: [
+          { title: { $regex: searchQuery, $options: 'i' } },
+          { content: { $regex: searchQuery, $options: 'i' } },
+        ],
+      }
+      : {};
+
+    const allPost = await this.postModel
+      .find(filter)
+      .populate('author', 'firstName lastName email')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalDocument = await this.postModel.countDocuments(filter)
+
 
     return {
       statusCode: 200,
       message: "Success",
-      data: allPost
+      data: {
+        allPost,
+        paginationMetadata: {
+          currentPage: page,
+          limit,
+          totalDocument: totalDocument,
+          totalPages: Math.ceil(totalDocument / limit)
+        }
+      }
     }
   }
 

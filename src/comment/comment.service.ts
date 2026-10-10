@@ -6,6 +6,7 @@ import { Comment } from './model/comment.model.js';
 import { Model } from 'mongoose';
 import { PostService } from '../post/post.service.js';
 import { IResponse } from '../common/interface/IResponse.js';
+import { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
 
 @Injectable()
 export class CommentService {
@@ -31,29 +32,57 @@ export class CommentService {
     };
   }
 
-  async findPostComments(postId: string): Promise<IResponse> {
+  async findPostComments(postId: string, query: IPaginationQuery): Promise<IResponse> {
     await this.postService.findOne(postId)
 
+    const page = Math.max(1, Math.trunc(Number(query.page)) || 1);
+    const limit = Math.min(100, Math.max(1, Math.trunc(Number(query.limit)) || 10));
     const comments = await this.commentModel
       .find({ post: postId })
-      .populate('author', 'firstName lastName email');
+      .populate('author', 'firstName lastName email')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalDocument = await this.commentModel.countDocuments()
 
     return {
       statusCode: 200,
       message: "Success",
-      data: comments
+      data: {
+        comments,
+        paginationMetadata: {
+          currentPage: page,
+          limit,
+          totalDocument: totalDocument,
+          totalPages: Math.ceil(totalDocument / limit)
+        }
+      }
     };
   }
 
-  async findUserComments(userId: string): Promise<IResponse> {
+  async findUserComments(userId: string, query: IPaginationQuery): Promise<IResponse> {
+    const page = Math.max(1, Math.trunc(Number(query.page)) || 1);
+    const limit = Math.min(100, Math.max(1, Math.trunc(Number(query.limit)) || 10));
     const comments = await this.commentModel
       .find({ author: userId })
-      .populate('post');
+      .populate('post')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalDocument = await this.commentModel.countDocuments()
 
     return {
       statusCode: 200,
       message: "Success",
-      data: comments
+      data: {
+        comments,
+        paginationMetadata: {
+          currentPage: page,
+          limit,
+          totalDocument: totalDocument,
+          totalPages: Math.ceil(totalDocument / limit)
+        }
+      }
     };
   }
 
@@ -83,7 +112,7 @@ export class CommentService {
     const updatedComment = await this.commentModel.findByIdAndUpdate(
       comment._id,
       { $set: updateCommentDto },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     );
 
     return {

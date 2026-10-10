@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { PostService } from './post.service.js';
 import { CreatePostDto } from './dto/create-post.dto.js';
 import { UpdatePostDto } from './dto/update-post.dto.js';
 import { LocalAuthGuard } from '../user/guards/local-auth.guard.js';
 import { CurrentUser } from '../user/decorator/current-user.decorator.js';
 import type { UserDocument } from '../user/models/user.model.js';
+import type { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
 
 @Controller('post')
 export class PostController {
@@ -17,8 +18,8 @@ export class PostController {
   }
 
   @Get()
-  findAll() {
-    return this.postService.findAll();
+  findAll(@Query() query: IPaginationQuery) {
+    return this.postService.findAll(query);
   }
 
   @Get(':id')

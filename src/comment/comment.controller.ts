@@ -5,6 +5,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto.js';
 import { LocalAuthGuard } from '../user/guards/local-auth.guard.js';
 import { CurrentUser } from '../user/decorator/current-user.decorator.js';
 import type { UserDocument } from '../user/models/user.model.js';
+import type { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
 
 
 @Controller('comment')
@@ -24,15 +25,18 @@ export class CommentController {
   @Get('post/:postId')
   findPostComments(
     @Param('postId') postId: string,
-    @Query() query: string
+    @Query() query: IPaginationQuery
   ) {
-    return this.commentService.findPostComments(postId);
+    return this.commentService.findPostComments(postId, query);
   }
 
   @Get('user/:userId')
   @UseGuards(LocalAuthGuard)
-  findUserComments(@CurrentUser() user: UserDocument) {
-    return this.commentService.findUserComments(user._id.toString());
+  findUserComments(
+    @CurrentUser() user: UserDocument,
+    @Query() query: IPaginationQuery
+  ) {
+    return this.commentService.findUserComments(user._id.toString(), query);
   }
 
   @Get(':id')
