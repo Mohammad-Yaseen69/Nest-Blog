@@ -94,6 +94,18 @@ export class UserService {
         return await bcrypt.compare(password, hashedPassword);
     }
 
+    async findUserForAuth(userId: string): Promise<Omit<User, 'password'> | null> {
+        const user = await this.userModel.findById(userId);
+
+        if (!user) {
+            return null
+        }
+
+        const { password, ...userWithoutPassword } = user.toObject();
+
+        return userWithoutPassword;
+    }
+
     async generateToken(user: UserDocument): Promise<string> {
         const payload = { email: user.email, sub: user._id };
 

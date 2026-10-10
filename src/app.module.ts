@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { ConfigModule } from "@nestjs/config"
+import { ConfigModule, ConfigService } from "@nestjs/config"
 import { UserModule } from './user/user.module.js';
 import { MongooseModule } from "@nestjs/mongoose"
 import joi from "joi"
@@ -24,7 +24,13 @@ import { JwtModule } from '@nestjs/jwt';
         expiresIn: Number(process.env.JWT_EXPIRATION_TIME) || 3600
       }
     }),
-    MongooseModule.forRoot(process.env.DATABASE_URL!),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.getOrThrow<string>('DATABASE_URL'),
+      }),
+    }),
     UserModule
   ],
   controllers: [AppController],
