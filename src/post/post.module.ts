@@ -4,13 +4,20 @@ import { PostController } from './post.controller.js';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PostSchema } from './model/post.model.js';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module.js';
+import { CommentSchema } from '../comment/model/comment.model.js';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{
-      name: "Post",
-      schema: PostSchema,
-    }]),
+    MongooseModule.forFeature([
+      {
+        name: "Post",
+        schema: PostSchema,
+      },
+      {
+        name: "Comment",
+        schema: CommentSchema,
+      }
+    ]),
     CloudinaryModule
   ],
   controllers: [PostController],

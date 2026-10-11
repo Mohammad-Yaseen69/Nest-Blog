@@ -30,7 +30,7 @@ export class CommentController {
     return this.commentService.findPostComments(postId, query);
   }
 
-  @Get('user/:userId')
+  @Get('user')
   @UseGuards(LocalAuthGuard)
   findUserComments(
     @CurrentUser() user: UserDocument,

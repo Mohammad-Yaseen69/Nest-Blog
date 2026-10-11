@@ -7,11 +7,13 @@ import { Model } from 'mongoose';
 import { Post } from './model/post.model.js';
 import { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
 import { CloudinaryService } from '../cloudinary/cloudinary.service.js';
+import { Comment } from '../comment/model/comment.model.js';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<Post>,
+    @InjectModel(Comment.name) private commentModel: Model<Comment>,
     private readonly cloudinaryService: CloudinaryService
   ) { }
 
@@ -138,6 +140,11 @@ export class PostService {
       throw new ForbiddenException("Only author or admin can delete this post")
     }
 
+    if (post.publicFileId) {
+      await this.cloudinaryService.deleteImage(post.publicFileId)
+    }
+
+    await this.commentModel.deleteMany({ post: post._id })
     await this.postModel.findByIdAndDelete(post._id)
 
     return {
