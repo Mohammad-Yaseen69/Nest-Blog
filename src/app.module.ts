@@ -8,6 +8,9 @@ import joi from "joi"
 import { JwtModule } from '@nestjs/jwt';
 import { PostModule } from './post/post.module.js';
 import { CommentModule } from './comment/comment.module.js';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { GlobalThrottlerGuard } from './common/guards/global-rate-limit.guard.js';
 
 @Module({
   imports: [
@@ -33,11 +36,26 @@ import { CommentModule } from './comment/comment.module.js';
         uri: config.getOrThrow<string>('DATABASE_URL'),
       }),
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+
+        },
+      ],
+    }),
     UserModule,
     PostModule,
     CommentModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: GlobalThrottlerGuard,
+    },
+  ],
 })
 export class AppModule { }
