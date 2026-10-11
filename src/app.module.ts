@@ -11,6 +11,7 @@ import { CommentModule } from './comment/comment.module.js';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { GlobalThrottlerGuard } from './common/guards/global-rate-limit.guard.js';
+import { CloudinaryModule } from './cloudinary/cloudinary.module.js';
 
 @Module({
   imports: [
@@ -47,7 +48,8 @@ import { GlobalThrottlerGuard } from './common/guards/global-rate-limit.guard.js
     }),
     UserModule,
     PostModule,
-    CommentModule
+    CommentModule,
+    CloudinaryModule
   ],
   controllers: [AppController],
   providers: [
