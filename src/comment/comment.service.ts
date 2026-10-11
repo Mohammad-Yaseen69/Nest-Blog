@@ -43,7 +43,7 @@ export class CommentService {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    const totalDocument = await this.commentModel.countDocuments()
+    const totalDocument = await this.commentModel.countDocuments({ post: postId })
 
     return {
       statusCode: 200,
@@ -69,7 +69,7 @@ export class CommentService {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    const totalDocument = await this.commentModel.countDocuments()
+    const totalDocument = await this.commentModel.countDocuments({ author: userId })
 
     return {
       statusCode: 200,
