@@ -22,6 +22,9 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module.js';
         DATABASE_URL: joi.string().required(),
         JWT_SECRET: joi.string().required(),
         JWT_EXPIRATION_TIME: joi.number().required(),
+        CLOUDINARY_CLOUD_NAME: joi.string().required(),
+        CLOUDINARY_API_KEY: joi.string().required(),
+        CLOUDINARY_API_SECRET: joi.string().required()
       })
     }),
     JwtModule.register({
