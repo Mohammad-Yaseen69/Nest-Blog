@@ -6,10 +6,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from './model/post.model.js';
 import { IPaginationQuery } from '../common/interface/IPaginationQuery.js';
+import { CloudinaryService } from '../cloudinary/cloudinary.service.js';
 
 @Injectable()
 export class PostService {
-  constructor(@InjectModel(Post.name) private postModel: Model<Post>) { }
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<Post>,
+    private readonly cloudinaryService: CloudinaryService
+  ) { }
 
   async create(createPostDto: CreatePostDto, userId: string): Promise<IResponse> {
     const newPost = new this.postModel({
@@ -85,7 +89,6 @@ export class PostService {
     const { data: post } = await this.findOne(id)
 
 
-    console.log(post.author, userId)
     if (post.author?._id?.toString() !== userId) {
       throw new ForbiddenException("Only author can update this post")
     }
@@ -98,6 +101,33 @@ export class PostService {
       statusCode: 200,
       message: "Success",
       data: updatedPost
+    }
+  }
+
+  async uploadImage(id: string, userId: string, file: Express.Multer.File): Promise<IResponse> {
+    const { data: post } = await this.findOne(id)
+
+
+    if (post.author?._id?.toString() !== userId) {
+      throw new ForbiddenException("Only author can update this post")
+    }
+
+    const result = await this.cloudinaryService.uploadImage(file)
+
+    if (post.publicFileId) {
+      await this.cloudinaryService.deleteImage(post.publicFileId)
+    }
+
+
+    post.publicFileId = result.public_id
+    post.fileUrl = result.secure_url
+    await post.save()
+
+
+    return {
+      statusCode: 200,
+      message: "Success",
+      data: post
     }
   }
 

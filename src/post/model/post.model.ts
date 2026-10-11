@@ -21,6 +21,12 @@ export class Post {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     author: User
+
+    @Prop()
+    publicFileId: string;
+
+    @Prop()
+    fileUrl: string
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
